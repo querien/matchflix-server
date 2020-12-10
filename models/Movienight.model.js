@@ -17,7 +17,11 @@ const movienightSchema = new Schema(
     movieArray: [String],
     participants: Number,
     imdbScore: Number,
-    genre: String,
+    genre: {
+      type: String,
+      enum: ["Action", "Adventure", "Animation", "Comedy", "Crime"],
+    },
+
     numbermovies: Number,
   },
   {

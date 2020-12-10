@@ -3,6 +3,7 @@ const User = require("../models/User.model");
 const Movienight = require("../models/Movienight.model");
 const authRoutes = require("./auth");
 const mongoose = require("mongoose");
+const axios = require("axios").default;
 
 const bcrypt = require("bcryptjs");
 const saltRounds = 10;
@@ -50,7 +51,17 @@ router.post("/movienight", (req, res, next) => {
     numberMovies: numberMovies,
     genre: genre,
     imdbScore: imdbScore,
-  }).then((newMovie) => console.log("SUCCES", newMovie));
+  })
+    .then((newMovienight) =>
+      axios.get(
+        `https://api.themoviedb.org/3/discover/movie?api_key=512eaf278b5e7663a80ea86ba79acd66&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&vote_average.gte=${newMovienight.imdbScore}&with_genres=28`
+      )
+    )
+    .then((APIresult) => {
+      console.log(APIresult.data);
+      return res.json(APIresult.data);
+    })
+    .catch((error) => console.log("message:", error));
 });
 
 router.use("/auth", authRoutes);
