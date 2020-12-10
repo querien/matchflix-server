@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const User = require("../models/User.model");
+const Movienight = require("../models/Movienight.model");
 const authRoutes = require("./auth");
 const mongoose = require("mongoose");
 
@@ -28,6 +29,28 @@ router.put("/settings", (req, res, next) => {
         });
       });
   });
+});
+
+router.post("/movienight", (req, res, next) => {
+  const {
+    host,
+    roomName,
+    roomPassword,
+    participants,
+    numberMovies,
+    genre,
+    imdbScore,
+  } = req.body;
+  console.log(host);
+  Movienight.create({
+    host: host,
+    roomName: roomName,
+    roomPassword: roomPassword,
+    participants: participants,
+    numberMovies: numberMovies,
+    genre: genre,
+    imdbScore: imdbScore,
+  }).then((newMovie) => console.log("SUCCES", newMovie));
 });
 
 router.use("/auth", authRoutes);
