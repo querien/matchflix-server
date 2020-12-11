@@ -4,9 +4,14 @@ const Movienight = require("../models/Movienight.model");
 const authRoutes = require("./auth");
 const mongoose = require("mongoose");
 const axios = require("axios").default;
+const APIKEY = process.env.APIKEY;
+const genres = require("../genres.json");
+const genreObject = genres.genres[0];
 
 const bcrypt = require("bcryptjs");
 const saltRounds = 10;
+
+genreObject;
 
 /* GET home page */
 router.get("/", (req, res, next) => {
@@ -42,7 +47,7 @@ router.post("/movienight", (req, res, next) => {
     genre,
     imdbScore,
   } = req.body;
-  console.log(host);
+
   Movienight.create({
     host: host,
     roomName: roomName,
@@ -54,12 +59,17 @@ router.post("/movienight", (req, res, next) => {
   })
     .then((newMovienight) =>
       axios.get(
-        `https://api.themoviedb.org/3/discover/movie?api_key=512eaf278b5e7663a80ea86ba79acd66&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&vote_average.gte=${newMovienight.imdbScore}&with_genres=28`
+        `https://api.themoviedb.org/3/discover/movie?api_key=${APIKEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&vote_average.gte=${
+          newMovienight.imdbScore
+        }&with_genres=${
+          genreObject[newMovienight.genre]
+        }&with_original_language=en`
       )
     )
     .then((APIresult) => {
-      console.log(APIresult.data);
-      return res.json(APIresult.data);
+      let sendToFrontend = APIresult.data.results.slice(0, numberMovies);
+      console.log(sendToFrontend);
+      return res.json(sendToFrontend);
     })
     .catch((error) => console.log("message:", error));
 });
