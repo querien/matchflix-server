@@ -8,8 +8,15 @@ const server = app.listen(PORT, () => {
   console.log(`Server listening on port http://localhost:${PORT}`);
 });
 
-// const io = socketio(server, {
-//   cors: { origin: process.env.ORIGIN || "http://localhost:3000" },
+const io = socketio(server, {
+  cors: { origin: process.env.ORIGIN || "http://localhost:3000" },
+});
+
+// io.on("connection", (socket) => {
+//   console.log("A user connected");
+//   io.emit("disconnect", () => {
+//     console.log("User disconnected");
+//   });
 // });
 
 // io.on("connection", (socket) => {

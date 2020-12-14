@@ -14,7 +14,7 @@ const movienightSchema = new Schema(
       required: true,
     },
     roomPassword: String,
-    movieArray: [String],
+    movieArray: [Object],
     participants: Number,
     imdbScore: Number,
     genre: {
