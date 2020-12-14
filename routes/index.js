@@ -60,9 +60,13 @@ router.post("/movienight", (req, res, next) => {
   });
   Promise.all([modelCreate, apiCall]).then((values) => {
     let moviesFromApi = values[1].data.results.slice(0, numberMovies);
-    Movienight.findByIdAndUpdate(values[0]._id, {
-      movieArray: [...moviesFromApi],
-    }).then((sendToTheFrontEnd) => {
+    Movienight.findByIdAndUpdate(
+      values[0]._id,
+      {
+        movieArray: [...moviesFromApi],
+      },
+      { new: true }
+    ).then((sendToTheFrontEnd) => {
       console.log(sendToTheFrontEnd);
       res.json(sendToTheFrontEnd);
     });
