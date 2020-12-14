@@ -11,8 +11,6 @@ const genreObject = genres.genres[0];
 const bcrypt = require("bcryptjs");
 const saltRounds = 10;
 
-genreObject;
-
 /* GET home page */
 router.get("/", (req, res, next) => {
   res.json("All good in here");
@@ -47,7 +45,6 @@ router.post("/movienight", (req, res, next) => {
     genre,
     imdbScore,
   } = req.body;
-
   Movienight.create({
     host: host,
     roomName: roomName,
@@ -68,7 +65,6 @@ router.post("/movienight", (req, res, next) => {
     )
     .then((APIresult) => {
       let sendToFrontend = APIresult.data.results.slice(0, numberMovies);
-      console.log(sendToFrontend);
       return res.json(sendToFrontend);
     })
     .catch((error) => console.log("message:", error));
