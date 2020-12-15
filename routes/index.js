@@ -74,6 +74,18 @@ router.post("/movienight", (req, res, next) => {
   });
 });
 
+router.post("/joinroom", (req, res) => {
+  const { roomName, roomPassword } = req.body;
+  Movienight.findOne({ roomName: roomName }).then((roomToJoin) => {
+    const { _id } = roomToJoin;
+    console.log(`The room you're trying to join is:`);
+    console.log(`The room id is: ${_id}`);
+    roomToJoin.roomPassword === roomPassword
+      ? res.json({ roomID: roomToJoin._id })
+      : res.json({ joinErr: "Wrong credentials to join the room" });
+  });
+});
+
 //   Movienight.create({
 //     host: host,
 //     roomName: roomName,
