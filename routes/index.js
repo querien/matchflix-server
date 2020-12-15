@@ -60,6 +60,7 @@ router.post("/movienight", (req, res, next) => {
   });
   Promise.all([modelCreate, apiCall]).then((values) => {
     let moviesFromApi = values[1].data.results.slice(0, numberMovies);
+    moviesFromApi.forEach((movie) => (movie.numVotes = 0));
     Movienight.findByIdAndUpdate(
       values[0]._id,
       {
