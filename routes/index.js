@@ -86,6 +86,14 @@ router.post("/joinroom", (req, res) => {
   });
 });
 
+router.post("/movienight", (req, res) => {
+  const { MovienightID, currentMovie } = req.body;
+  Movienight.findOneandUpdate(
+    { _id: MovienightID },
+    { "movieArray.$[0]": { numVotes: numVotes + 1 } }
+  );
+});
+
 //   Movienight.create({
 //     host: host,
 //     roomName: roomName,
