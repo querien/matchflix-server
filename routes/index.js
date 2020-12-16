@@ -10,6 +10,7 @@ const genreObject = genres.genres[0];
 
 const bcrypt = require("bcryptjs");
 const { findByIdAndUpdate } = require("../models/User.model");
+const e = require("express");
 const saltRounds = 10;
 
 /* GET home page */
@@ -88,8 +89,14 @@ router.post("/joinroom", (req, res) => {
 });
 
 router.post("/room/:id", (req, res) => {
-  const { MovienightID, participantID, currentMovie, vote } = req.body;
-  console.log(participantID);
+  console.log(req.body);
+  const {
+    MovienightID,
+    ParticipantID: participantID,
+    currentMovie,
+    vote,
+  } = req.body;
+  //console.log(participantID);
   Movienight.findByIdAndUpdate(
     MovienightID,
     {
@@ -102,31 +109,50 @@ router.post("/room/:id", (req, res) => {
   });
 });
 
-//   Movienight.create({
-//     host: host,
-//     roomName: roomName,
-//     roomPassword: roomPassword,
-//     participants: participants,
-//     numberMovies: numberMovies,
-//     genre: genre,
-//     imdbScore: imdbScore,
-//   })
-//     .then((newMovienight) =>
-//       axios.get(
-//         `https://api.themoviedb.org/3/discover/movie?api_key=${APIKEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&vote_average.gte=${
-//           newMovienight.imdbScore
-//         }&with_genres=${
-//           genreObject[newMovienight.genre]
-//         }&with_original_language=en`
-//       )
-//     )
-//     .then((APIresult) => {
-//       let sendToFrontend = APIresult.data.results.slice(0, numberMovies);
-//       newMovienight.movieArray = [...sendToFrontend];
-//       return res.json(newMovienight);
-//     })
-//     .catch((error) => console.log("message:", error));
-// });
+router.post("/results/:id", (req, res) => {
+  console.log(req.body);
+  const { MovienightID, ParticipantID: participantID } = req.body;
+  console.log(participantID);
+  Movienight.findByIdAndUpdate(
+    MovienightID,
+    {
+      $pull: { participantID: participantID },
+    },
+    { new: true }
+  ).then((responsetoFrontEnd) => {
+    console.log("HEEERE", responsetoFrontEnd);
+    res.json(responsetoFrontEnd);
+  });
+});
+
+router.get("/results/:id", (req, res) => {
+  const id = "5fda402ed159732e3921d7b1";
+  console.log("In the backend, we find this", req);
+  Movienight.findOne({ _id: id }).then((result) => {
+    console.log(result);
+    let finalCount;
+    if (result.participantID.length > 0) {
+      return;
+    } else {
+      let sortedArr = result.movieArray.sort(function (movie1, movie2) {
+        // Sort by votes
+        // If the first item has a higher number, move it down
+        // If the first item has a lower number, move it up
+        if (movie1.numVotes > movie2.numVotes) return 1;
+        if (movie1.numVotes < movie2.numVotes) return -1;
+
+        // If the votes number is the same between both items, sort alphabetically
+        // If the first item comes first in the alphabet, move it up
+        // Otherwise move it down
+        if (movie1.imdbScore > movie2.imdbScore) return 1;
+        if (movie1.imdbScore < movie2.imdbScore) return -1;
+      });
+      finalCount = sortedArr.slice(0, 3);
+      return finalCount;
+    }
+  });
+  return res.json(result, finalCount);
+});
 
 router.use("/auth", authRoutes);
 
