@@ -8,6 +8,7 @@ const movienightSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
+    participantID: [String],
     roomName: {
       type: String,
       unique: true,

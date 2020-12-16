@@ -74,16 +74,31 @@ router.post("/movienight", (req, res, next) => {
   });
 });
 
+router.get("/movienight", (req, res) => {
+  res.json("Does this work");
+});
+
 router.post("/joinroom", (req, res) => {
   const { roomName, roomPassword } = req.body;
   Movienight.findOne({ roomName: roomName }).then((roomToJoin) => {
-    console.log(`The room you're trying to join has the name ${roomToJoin}`);
-    roomToJoin === null
-      ? res.json({ joinErr: "Wrong credentials to join the room" })
-      : //console.log(`The name youinput is ${roomPassword}`);
-      roomToJoin.roomPassword === roomPassword
-      ? res.json({ roomID: roomToJoin._id })
+    roomToJoin.roomPassword === roomPassword
+      ? res.json({ roomToJoin })
       : res.json({ joinErr: "Wrong credentials to join the room" });
+  });
+});
+
+router.post("/room/:id", (req, res) => {
+  const { MovienightID, participantID, currentMovie, vote } = req.body;
+  console.log(participantID);
+  Movienight.findByIdAndUpdate(
+    MovienightID,
+    {
+      $inc: { [`movieArray.${currentMovie}.numVotes`]: vote },
+      $addToSet: { participantID: participantID },
+    },
+    { new: true }
+  ).then((responsetoFrontEnd) => {
+    res.json(responsetoFrontEnd);
   });
 });
 
