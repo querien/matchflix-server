@@ -162,7 +162,7 @@ router.get("/results/:id", (req, res) => {
     //  console.log("this is the response from the query", response);
     let finalCount = [];
     if (response.participantsDone.length < response.participants) {
-      return res.json({});
+      return res.json(false);
     } else {
       let sortedArr = response.movieArray.sort(function (movie1, movie2) {
         // Sort by votes
