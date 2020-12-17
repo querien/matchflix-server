@@ -120,19 +120,14 @@ router.post("/joinroom", (req, res) => {
 });
 
 router.post("/room/:id", (req, res) => {
-  console.log(req.body);
-  const {
-    MovienightID,
-    ParticipantID: participantID,
-    currentMovie,
-    vote,
-  } = req.body;
+  // console.log(req.body);
+  const { movienightID, participantID, currentMovie, vote } = req.body;
   //console.log(participantID);
   Movienight.findByIdAndUpdate(
-    MovienightID,
+    movienightID,
     {
       $inc: { [`movieArray.${currentMovie}.numVotes`]: vote },
-      $addToSet: { participantID: participantID },
+      $addToSet: { participantStartedVoting: participantID },
     },
     { new: true }
   ).then((responsetoFrontEnd) => {
@@ -142,12 +137,13 @@ router.post("/room/:id", (req, res) => {
 
 router.post("/results/:id", (req, res) => {
   console.log(req.body);
-  const { MovienightID, ParticipantID: participantID } = req.body;
+  const { movienightID, participantID } = req.body;
   console.log(participantID);
   Movienight.findByIdAndUpdate(
-    MovienightID,
+    movienightID,
     {
-      $pull: { participantID: participantID },
+      $addToSet: { participantsDone: participantID },
+      // $pull: { participantID: participantID },
     },
     { new: true }
   ).then((responsetoFrontEnd) => {
@@ -155,17 +151,20 @@ router.post("/results/:id", (req, res) => {
     res.json(responsetoFrontEnd);
   });
 });
-
+let count = 0;
 router.get("/results/:id", (req, res) => {
-  const id = "5fda402ed159732e3921d7b1";
-  console.log("In the backend, we find this", req);
-  Movienight.findOne({ _id: id }).then((result) => {
-    console.log(result);
-    let finalCount;
-    if (result.participantID.length > 0) {
-      return;
+  //console.log(req.params);
+  count++;
+  console.log(count);
+  const movieId = req.params.id;
+  //console.log("the id is", movieId);
+  Movienight.findOne({ _id: movieId }).then((response) => {
+    //  console.log("this is the response from the query", response);
+    let finalCount = [];
+    if (response.participantsDone.length < response.participants) {
+      return res.json({});
     } else {
-      let sortedArr = result.movieArray.sort(function (movie1, movie2) {
+      let sortedArr = response.movieArray.sort(function (movie1, movie2) {
         // Sort by votes
         // If the first item has a higher number, move it down
         // If the first item has a lower number, move it up
@@ -179,10 +178,9 @@ router.get("/results/:id", (req, res) => {
         if (movie1.imdbScore < movie2.imdbScore) return -1;
       });
       finalCount = sortedArr.slice(0, 3);
-      return finalCount;
     }
+    return res.json(finalCount);
   });
-  return res.json(result, finalCount);
 });
 
 router.use("/auth", authRoutes);
