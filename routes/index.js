@@ -143,7 +143,6 @@ router.post("/results/:id", (req, res) => {
     movienightID,
     {
       $addToSet: { participantsDone: participantID },
-      // $pull: { participantID: participantID },
     },
     { new: true }
   ).then((responsetoFrontEnd) => {
@@ -165,17 +164,20 @@ router.get("/results/:id", (req, res) => {
       return res.json(false);
     } else {
       let sortedArr = response.movieArray.sort(function (movie1, movie2) {
-        // Sort by votes
-        // If the first item has a higher number, move it down
-        // If the first item has a lower number, move it up
-        if (movie1.numVotes > movie2.numVotes) return 1;
-        if (movie1.numVotes < movie2.numVotes) return -1;
-
-        // If the votes number is the same between both items, sort alphabetically
-        // If the first item comes first in the alphabet, move it up
-        // Otherwise move it down
-        if (movie1.imdbScore > movie2.imdbScore) return 1;
-        if (movie1.imdbScore < movie2.imdbScore) return -1;
+        if (movie1.numVotes > movie2.numVotes) {
+          return -1;
+        } else if (movie1.numVotes < movie2.numVotes) {
+          return 1;
+        }
+        // Else go to the 2nd item
+        if (movie1.vote_average < movie2.vote_average) {
+          return 1;
+        } else if (movie1.vote_average > movie2.vote_average) {
+          return -1;
+        } else {
+          // nothing to split them
+          return 0;
+        }
       });
       finalCount = sortedArr.slice(0, 3);
     }
