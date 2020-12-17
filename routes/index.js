@@ -100,7 +100,7 @@ router.post("/movienight", (req, res, next) => {
       },
       { new: true }
     ).then((sendToTheFrontEnd) => {
-      console.log(sendToTheFrontEnd);
+      //console.log(sendToTheFrontEnd);
       res.json(sendToTheFrontEnd);
     });
   });

@@ -9,33 +9,22 @@ const PORT = process.env.PORT || 5005;
 const server = app.listen(PORT, () => {
   console.log(`Server listening on port http://localhost:${PORT}`);
 });
-const pseudoState = { usersInTheRoom: [] };
+
 const io = socketio(server, {
   cors: { origin: process.env.ORIGIN || "http://localhost:3000" },
 });
 
 io.on("connection", (socket) => {
-  console.log("A user connected");
-  socket.on("lookForData", (userData) => {
-    pseudoState.roomID = userData.id;
-    // socket.join(pseudoState.roomID);
-    console.log("Id as sent to the server: ", userData.id);
-    pseudoState.usersInTheRoom.push(userData.user);
-    console.log(`Username: ${userData.user.username}, ID: ${userData.id}`);
-    Movienight.findById(userData.id)
-      .then((correctRoom) => {
-        console.log(
-          `Movies from the server: ${JSON.stringify(correctRoom.movieArray)}`
-        );
-        pseudoState.movieArray = correctRoom.movieArray;
-      })
-      .catch((err) => {
-        console.log(`Error: ${err}`);
-      });
-    io.emit("dataFromServer", { ...pseudoState });
+  console.log("A user connected to the web server");
+  io.on("joinRoom", ({ username, roomID, participants }) => {
+    socket.join(roomID);
+    console.log(
+      `${username} is now in room ${roomID}, which contains up to ${participants} participants`
+    );
+    io.to(roomID).emit("message", { msg: "This is a message from the room" });
   });
+
   io.on("disconnect", () => {
-    // socket.leave(pseudoState.roomID);
     console.log("User disconnected");
   });
 });
