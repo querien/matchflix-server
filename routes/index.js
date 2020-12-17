@@ -19,22 +19,53 @@ router.get("/", (req, res, next) => {
 });
 
 router.put("/settings", (req, res, next) => {
+  console.log(
+    `req.body from the put request - id: ${req.body.id} - username: ${req.body.username} - password: ${req.body.password}`
+  );
   const { id, username, password } = req.body;
-  User.findOne({ username }).then((found) => {
-    // If the user is found, send the message username is taken
-    if (found) {
-      return res.status(400).json({ errorMessage: "Username already taken." });
-    }
-    return bcrypt
-      .genSalt(saltRounds)
-      .then((salt) => bcrypt.hash(password, salt))
-      .then((hashedPassword) => {
-        return User.findByIdAndUpdate(id, {
-          username: username,
-          password: hashedPassword,
+
+  if (req.body.password !== undefined) {
+    User.findOne({ username }).then((found) => {
+      // If the user is found, send the message username is taken
+
+      if (found !== null && found.id !== id) {
+        return res
+          .status(400)
+          .json({ errorMessage: "Username already taken." });
+      }
+
+      console.log(`About to be encrypted`);
+      return bcrypt
+        .genSalt(saltRounds)
+        .then((salt) => bcrypt.hash(password, salt))
+        .then((hashedPassword) => {
+          // Create a user and save it in the database
+          return User.findByIdAndUpdate(id, {
+            username,
+            password: hashedPassword,
+          });
+        })
+        .catch((err) => {
+          return res.status(400).json({
+            errorMessage:
+              "Something went wrong while trying to update your password",
+          });
         });
+    });
+  } else {
+    User.findOne({ username }).then((found) => {
+      // If the user is found, send the message username is taken
+
+      if (found !== null && found.id !== id) {
+        return res
+          .status(400)
+          .json({ errorMessage: "Username already taken." });
+      }
+      return User.findByIdAndUpdate(id, {
+        username,
       });
-  });
+    });
+  }
 });
 
 router.post("/movienight", (req, res, next) => {
